@@ -33,7 +33,7 @@ jobs:
     - name: Commit and push changes if any
       uses: peaceiris/actions-gh-pages@v3
       with:
-        deploy_key: ${{ secrets.GITHUB_TOKEN }}
+        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
         publish_dir: ./wows
         keep_files: false
         enable_jekyll: true
