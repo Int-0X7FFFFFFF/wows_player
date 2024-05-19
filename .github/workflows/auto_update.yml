@@ -30,7 +30,7 @@ jobs:
         python update_ships.py ${{ secrets.APPLICATION_ID }}
       working-directory: wows_data
 
-    - name: Check for changes
+    - name: Commit and push changes if any
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -41,3 +41,5 @@ jobs:
           git commit -m "Automated update of changes"
           git push
         fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
