@@ -49,6 +49,37 @@ def update_ships(work_dir: Path, application_id: str) -> Optional[Exception]:
         return error
 
 
+def check_and_update_ships(work_dir: Path, application_id: str) -> Optional[Exception]:
+    with open(work_dir / "version.json", "r") as file:
+        update_at = json.load(file)["ships"]
+    api_url = "https://api.worldofwarships.eu/wows/encyclopedia/info/"
+    params = {
+        "application_id": application_id,
+        "language": "zh-cn",
+    }
+    with requests.get(url=api_url, params=params) as response:
+        response.raise_for_status()
+        data = response.json()
+        if data["status"] != "ok":
+            return Exception("status not OK")
+        if update_at < data["data"]["ships_updated_at"]:
+            update_at = data["data"]["ships_updated_at"]
+            res = update_ships(work_dir, application_id)
+            if not res:
+                with open(work_dir / "version.json", "w", encoding="utf-8") as file:
+                    json.dump(
+                        {
+                            "ships": update_at,
+                        },
+                        file,
+                        ensure_ascii=False,
+                        indent=4,
+                    )
+            else:
+                return res
+    pass
+
+
 def update_norm_data(work_dir: Path) -> Optional[Exception]:
     try:
         with requests.get(
@@ -84,7 +115,7 @@ def main() -> None:
 
     assert application_id is not None
 
-    response_ships = update_ships(work_dir, application_id)
+    response_ships = check_and_update_ships(work_dir, application_id)
     response_norms = update_norm_data(work_dir)
     if response_ships:
         raise response_ships
